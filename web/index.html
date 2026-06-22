@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ProofDrop — Compliance Dashboard</title>
+<style>
+  :root { --bg:#0b0d12; --card:#151823; --line:#252a38; --fg:#e7e9ee; --mut:#8b91a3;
+          --accent:#7c5cff; --ok:#28c08a; --warn:#ffb020; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+         font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
+  .wrap { max-width:960px; margin:0 auto; padding:32px 20px 60px; }
+  h1 { font-size:24px; margin:0 0 2px; }
+  .sub { color:var(--mut); margin:0 0 20px; }
+  .badge { display:inline-block; font-size:12px; font-weight:600; color:#fff;
+           background:var(--accent); border-radius:999px; padding:2px 10px; vertical-align:middle; }
+  .badge.test { background:var(--ok); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin:18px 0; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
+  .stat .k { color:var(--mut); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+  .stat .v { font-size:26px; font-weight:700; margin-top:4px; }
+  .stat .v small { font-size:14px; color:var(--mut); font-weight:500; }
+  section h2 { font-size:15px; text-transform:uppercase; letter-spacing:.05em; color:var(--mut);
+               border-bottom:1px solid var(--line); padding-bottom:8px; margin:28px 0 12px; }
+  .row { display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-bottom:1px dashed var(--line); }
+  .row:last-child { border-bottom:0; }
+  .row .k { color:var(--mut); }
+  .row .v { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; word-break:break-all; text-align:right; }
+  a { color:#9d86ff; text-decoration:none; } a:hover { text-decoration:underline; }
+  .ok { color:var(--ok); font-weight:600; }
+  .pill { font-size:12px; color:var(--ok); border:1px solid var(--ok); border-radius:999px; padding:1px 8px; }
+  .note { color:var(--mut); font-size:13px; margin-top:8px; }
+  footer { color:var(--mut); font-size:12px; margin-top:28px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>ProofDrop <span class="badge">Stellar testnet</span> <span class="badge test" id="tests">tests</span></h1>
+  <p class="sub">Compliance-ready private disbursement rails — live on-chain reconciliation.</p>
+
+  <div class="grid" id="stats"></div>
+
+  <section>
+    <h2>Campaign</h2>
+    <div id="campaign"></div>
+  </section>
+
+  <section>
+    <h2>Auditor reconciliation</h2>
+    <div id="audit"></div>
+    <p class="note">An auditor verifies totals, claim count, asset and policy roots straight from
+    Stellar state — <strong>without learning any recipient's identity.</strong></p>
+  </section>
+
+  <section>
+    <h2>Privacy &amp; integrity (zero-knowledge)</h2>
+    <div id="privacy"></div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+  const d = window.DASHBOARD_DATA;
+  const s = d.summary;
+  const xlm = v => (Number(v||0)/1e7).toLocaleString(undefined,{maximumFractionDigits:7}) + " XLM";
+  const short = h => h ? h.slice(0,6)+"…"+h.slice(-4) : "—";
+  const exC = id => `https://stellar.expert/explorer/testnet/contract/${id}`;
+  const exA = id => `https://stellar.expert/explorer/testnet/account/${id}`;
+  const el = (html) => { const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstChild; };
+
+  document.getElementById('tests').textContent = d.facts.tests;
+
+  const stats = [
+    ["Successful claims", s.claim_count],
+    ["Total disbursed", xlm(s.total_disbursed)],
+    ["Remaining budget", xlm(d.remainingBalance)],
+    ["Per-claim amount", xlm(s.amount)],
+  ];
+  document.getElementById('stats').append(...stats.map(([k,v]) =>
+    el(`<div class="card stat"><div class="k">${k}</div><div class="v">${v}</div></div>`)));
+
+  const rows = (pairs,id) => document.getElementById(id).append(...pairs.map(([k,v]) =>
+    el(`<div class="row"><span class="k">${k}</span><span class="v">${v}</span></div>`)));
+
+  rows([
+    ["Contract", `<a href="${exC(d.contract)}" target="_blank">${short(d.contract)}</a>`],
+    ["Issuer / admin", `<a href="${exA(s.admin)}" target="_blank">${short(s.admin)}</a>`],
+    ["Asset (SEP-41)", `<a href="${exC(s.token)}" target="_blank">${short(s.token)}</a>`],
+    ["Campaign id", s.campaign_id],
+    ["Allowlist root", short(s.allow_root)],
+    ["Active deny root", short(s.deny_root)],
+  ], 'campaign');
+
+  const expected = Number(s.claim_count) * Number(s.amount);
+  const match = expected === Number(s.total_disbursed);
+  rows([
+    ["Expected (claims × amount)", xlm(expected)],
+    ["Contract-reported total", xlm(s.total_disbursed)],
+    ["Reconciled", match ? '<span class="pill">✓ totals match</span>' : '⚠ mismatch'],
+  ], 'audit');
+
+  rows([
+    ["Proof system", d.facts.system],
+    ["Curve / host fns", d.facts.curve],
+    ["Circuit constraints", d.facts.constraints.toLocaleString()],
+    ["Eligibility", "allowlist Merkle membership (identity hidden)"],
+    ["Sybil / double-claim", "per-campaign nullifier"],
+    ["Front-run safety", "proof bound to recipient + amount"],
+    ["Revocation / sanctions", "denylist non-membership + admin deny-root"],
+    ["Selective disclosure", "auditor-attested enrollment registry (roadmap)"],
+  ], 'privacy');
+
+  document.getElementById('foot').textContent =
+    `Read-only view of contract ${d.contract} on ${d.network}. Data via campaign_audit_summary.`;
+</script>
+</body>
+</html>
