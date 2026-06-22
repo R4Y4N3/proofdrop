@@ -10,7 +10,7 @@ in stablecoins without exposing them on-chain, with one-claim anti-abuse, issuer
 revocation, and auditor-ready reporting.
 
 ## Links
-- **Repo:** <add public GitHub URL>
+- **Repo:** https://github.com/R4Y4N3/proofdrop
 - **Demo video (2–3 min):** <add URL>
 - **Live contract (testnet):** [`CDOHFSYP…22FI`](https://stellar.expert/explorer/testnet/contract/CDOHFSYP2V2UXQYLS6GFYXSOQMYB6FOUNQYTH7GXXPGF2KFRSE7E22FI)
 - **Private claim tx:** [`7f698d0d…`](https://stellar.expert/explorer/testnet/tx/7f698d0d1bf15e78b7ba3603684184db51dcb7efcf1e878786ec61b26c266bc3)
