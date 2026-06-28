@@ -103,21 +103,34 @@ Remove the proof and the product disappears:
 
 ## Architecture
 
-```
- off-chain (Circom / snarkjs, BN254)         on-chain (Soroban, Rust)
- ───────────────────────────────────         ─────────────────────────────────
- identity = (nullifier, trapdoor)
- commitment = Poseidon(nullifier, trapdoor)
- allow tree ──► allowRoot ──────────────────► stored per campaign
- deny  SMT  ──► denyRoot  ──────────────────► admin-updatable (revocation)
- Groth16 proof:                               claim(proof, signals, recipient):
-   • commitment ∈ allow tree                    1. BN254 pairing_check  ✔
-   • commitment ∉ deny  SMT  (non-membership)   2. bind allowRoot + denyRoot
-   • nullifier = Poseidon(null, campaignId)     3. bind campaign/amount/recipient
-   • binds recipientHash, amount                4. nullifier unused → spend
-        │                                        5. token.transfer → recipient
-        ▼
-   proof + public signals  ───────────────►   set_deny_root(...)  (admin revokes)
+```mermaid
+flowchart LR
+  subgraph OFF["Off-chain — Circom / snarkjs (BN254)"]
+    direction TB
+    ID["Identity secret<br/>(nullifier, trapdoor)"]
+    COM["commitment =<br/>Poseidon(nullifier, trapdoor)"]
+    ALLOW["Allowlist Merkle tree<br/>→ allowRoot"]
+    DENY["Denylist SMT<br/>→ denyRoot"]
+    PROOF["Groth16 proof proves:<br/>• commitment ∈ allowlist<br/>• commitment ∉ denylist<br/>• nullifier = Poseidon(nullifier, campaignId)<br/>• binds recipient + amount"]
+    ID --> COM --> PROOF
+    ALLOW --> PROOF
+    DENY --> PROOF
+  end
+
+  subgraph ON["On-chain — Soroban contract (Rust)"]
+    direction TB
+    CAMP["Campaign state<br/>allowRoot · denyRoot · token · vk"]
+    CLAIM["claim(proof, signals, recipient)<br/>1 · BN254 pairing_check ✔<br/>2 · bind allow/deny roots<br/>3 · bind campaign / amount / recipient<br/>4 · nullifier unused → spend<br/>5 · SEP-41 transfer → recipient"]
+    ADMIN["set_deny_root()<br/>issuer revocation"]
+    AUDIT["campaign_audit_summary()<br/>auditor reconciliation"]
+  end
+
+  PROOF -->|"proof + public signals"| CLAIM
+  ALLOW -.->|allowRoot| CAMP
+  DENY -.->|denyRoot| CAMP
+  CAMP --> CLAIM
+  ADMIN -.->|updates denyRoot| CAMP
+  CLAIM --> AUDIT
 ```
 
 Public signal order (frozen, must match contract and circuit):
