@@ -51,8 +51,8 @@ live campaign — claims, totals, reconciliation, explorer links) · `make audit
 > BN254 host functions, then paid out. Attacks and a revoked claim are all
 > rejected live.
 >
-> - **Contract:** [`CDOHFSYP…22FI`](https://stellar.expert/explorer/testnet/contract/CDOHFSYP2V2UXQYLS6GFYXSOQMYB6FOUNQYTH7GXXPGF2KFRSE7E22FI)
-> - **Private claim tx:** [`7f698d0d…`](https://stellar.expert/explorer/testnet/tx/7f698d0d1bf15e78b7ba3603684184db51dcb7efcf1e878786ec61b26c266bc3)
+> - **Contract:** [`CCHOFZBK…6AXFS`](https://stellar.expert/explorer/testnet/contract/CCHOFZBKZVBBCGSJFYPUV3Q4HPY3GOMBX2Q7H4CLP3IIBOX2W6U6AXFS)
+> - **Private claim tx:** [`0fa86207…`](https://stellar.expert/explorer/testnet/tx/0fa86207117ed0869e66af8738d4213b1c189376f2650b53e925b1a6526031e4)
 > - Double-claim → `#9 AlreadyClaimed` · Front-run → `#7 RecipientMismatch` · **Revoked → `#10 DenyRootMismatch`** · **Auditor report reconciles totals**
 > - Full details + reproduce steps: **[DEPLOYMENT.md](DEPLOYMENT.md)**
 

@@ -8,22 +8,26 @@ the **admin revocation** (compliance control) is demonstrated; and an
 | Item | Value |
 |------|-------|
 | Network | Stellar **Testnet** |
-| ProofDrop contract | [`CDOHFSYP2V2UXQYLS6GFYXSOQMYB6FOUNQYTH7GXXPGF2KFRSE7E22FI`](https://stellar.expert/explorer/testnet/contract/CDOHFSYP2V2UXQYLS6GFYXSOQMYB6FOUNQYTH7GXXPGF2KFRSE7E22FI) |
+| ProofDrop contract | [`CCHOFZBKZVBBCGSJFYPUV3Q4HPY3GOMBX2Q7H4CLP3IIBOX2W6U6AXFS`](https://stellar.expert/explorer/testnet/contract/CCHOFZBKZVBBCGSJFYPUV3Q4HPY3GOMBX2Q7H4CLP3IIBOX2W6U6AXFS) |
 | Disbursed asset | native XLM SAC `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC` |
 | Admin / funder | `GCAYIAWGRUPZDWDL7ALJAJ4J5FCUFQQU5TI74V7PSXZYJKM7B2O2UZMW` |
 | Recipient A (claims) | `GCHZQT3ZL2LZXNXI3PPHRCPIZT7LFLLOKZVSX7BKNOMXUMAKGXSIXYTA` |
 | Recipient B (revoked) | `GBJHWESY6SAUFQ7JE5Z3SBNUXQ22OXHCFBFRZNBX2WBKR6X3PM3MBNKV` |
 
-## Transactions (stellar.expert)
+## Transactions (verified via Soroban RPC; click to view)
 
-| Step | Tx |
-|------|----|
-| **Private claim (proof-gated payout to A)** | [`7f698d0d…`](https://stellar.expert/explorer/testnet/tx/7f698d0d1bf15e78b7ba3603684184db51dcb7efcf1e878786ec61b26c266bc3) |
-| **Admin revokes B** (`set_deny_root`) | [`1e8cd5c2…`](https://stellar.expert/explorer/testnet/tx/1e8cd5c2e502c9544609c4d0475191e984b0e0298407366129328a8418ba9315) |
+| Step | Event | Transaction |
+|------|-------|-------------|
+| Create + fund campaign #42 | `created` | [`e059ee26…`](https://stellar.expert/explorer/testnet/tx/e059ee26a9d54409f3cd780af824b55cc78b53777f6e53158bc57a5b93882df4) |
+| **Private claim (proof-gated payout to A)** | `claim` | [`0fa86207…`](https://stellar.expert/explorer/testnet/tx/0fa86207117ed0869e66af8738d4213b1c189376f2650b53e925b1a6526031e4) |
+| **Admin revokes B** (`set_deny_root`) | `deny_set` | [`a3f05413…`](https://stellar.expert/explorer/testnet/tx/a3f05413d3b296fb0f35efeafa0ff47d946af608a5e4b0beda78b43d9b3a60ab) |
 
-Recipient A's balance moved `100001000000 → 100002000000` (+0.1 XLM), released
-only after on-chain BN254 proof verification. The claim emits a `claim` event
-`(campaign_id, nullifier, recipient, amount)`; revocation emits `deny_set`.
+The claim released 0.1 XLM to recipient A only after on-chain BN254 proof
+verification; the contract's remaining balance reflects the disbursement.
+
+> Note: stellar.expert's **contract-level** Events/History tabs can lag on testnet.
+> The individual transaction pages above render immediately, and Soroban RPC
+> `getEvents` confirms all three contract events (`created`, `claim`, `deny_set`).
 
 ## Live policy enforcement (all rejected on-chain)
 
@@ -31,31 +35,17 @@ only after on-chain BN254 proof verification. The claim emits a `claim` event
 - **Front-run** (A's proof redirected) → `#7 RecipientMismatch` (proof bound to recipient).
 - **Revoked claim** (B after admin updates the deny root) → `#10 DenyRootMismatch`.
 
-## Auditor reconciliation (compliance, no de-anonymization)
+## Auditor reconciliation (compliance, no eligibility de-anonymization)
 
-`bash scripts/audit.sh <contract> 42` reads on-chain state and prints:
-
-```
- ProofDrop — Auditor Report (Stellar testnet)
- Campaign        : 42
- Asset (SEP-41)  : CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC
- Allowlist root  : 2624b7c8…
- Active deny root: 178f1003…
- Successful claims : 1
- Total disbursed   : 1000000
- Conclusion: every payout is one-claim-per-nullifier, bound to this campaign
- and asset, and reconciles to the contract total — without revealing which
- eligibility-set member claimed (recipient address + amount are public).
-```
-
-An auditor verifies totals, claim count, asset/campaign consistency, and the
-active policy roots — **without learning which eligibility-set member each claim
-maps to.** (Recipient address + amount are public, as in any payment; recipient-level
-selective disclosure via a viewing key is a documented future step.)
+`bash scripts/audit.sh <contract> 42` reads on-chain state and prints campaign
+totals, claim count, asset/campaign consistency, and the active allow/deny roots —
+**without revealing which eligibility-set member each claim maps to** (recipient
+address + amount are public, as in any payment). Recipient-level selective
+disclosure via a viewing key is a documented future step.
 
 ## Reproduce it
 
 ```bash
-make circuit                 # one-time: compile circuit + Groth16 setup
+make circuit                     # one-time: compile circuit + Groth16 setup
 bash scripts/deploy_testnet.sh   # deploy -> claim -> attacks rejected -> revoke -> audit
 ```
