@@ -1,9 +1,10 @@
 # ProofDrop — 2–3 min demo video script
 
-**How to record:** screen-record a terminal + a browser tab on stellar.expert.
-Run `bash scripts/deploy_testnet.sh` once beforehand so you have fresh tx links,
-or run it live. Read the voiceover below; on-screen, show the labelled beats.
-You do not need to appear on camera.
+**Easiest path (recommended):** start your screen recorder, then run
+**`bash scripts/record_demo.sh`** — it auto-plays the whole demo with big captions
+and pacing (deploy → claim → attacks rejected → revoke → auditor report), live on
+testnet, in ~2 min. Read the voiceover below as it plays. No typing, no camera
+needed. (`scripts/deploy_testnet.sh` is the same flow without the cinematic pacing.)
 
 Target length: **2:40**. Keep terminal font large. Add a one-line caption per beat.
 
