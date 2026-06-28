@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ProofDrop auditor report — reconciles a campaign from on-chain Stellar state
-# without de-anonymizing any recipient.
+# without revealing which eligibility-set member each claim maps to.
 #   bash scripts/audit.sh <contract_id> <campaign_id>
 set -euo pipefail
 export PATH="$HOME/.cargo/bin:$PATH"
@@ -33,7 +33,7 @@ echo "$S" | jq -r '
   " Total disbursed   : \(.total_disbursed)",
   "──────────────────────────────────────────────",
   " Conclusion: every payout is one-claim-per-nullifier, bound to this",
-  " campaign and asset, and reconciles to the contract total — with no",
-  " recipient identity revealed on-chain.",
+  " campaign and asset, and reconciles to the contract total — without",
+  " revealing which eligibility-set member each claim maps to.",
   "──────────────────────────────────────────────"
 '

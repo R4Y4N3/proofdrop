@@ -4,8 +4,9 @@
 
 *ProofDrop lets regulated organizations privately pay approved recipients on
 Stellar. One ZK proof proves eligibility, one-claim uniqueness, recipient binding,
-and denylist status; Soroban verifies it on-chain and releases the payout without
-revealing the claimant's identity. A privacy + compliance layer for the
+and denylist status; Soroban verifies it on-chain and releases the payout —
+without revealing **which member of the issuer's eligibility set** is claiming.
+A privacy + compliance layer for the
 [Stellar Disbursement Platform](https://developers.stellar.org/docs/platforms/stellar-disbursement-platform)
 audience.*
 
@@ -17,8 +18,9 @@ audience.*
 Stellar. An NGO, employer, or grant program makes **SEP-41 payouts (stablecoin-ready,
 demoed with native XLM) only to approved recipients** — blocking double-claims,
 redirected/front-run payouts, and
-**revoked (sanctioned) recipients** — while **never revealing the claimant's
-identity on-chain**. It's the [Stellar Disbursement Platform](https://developers.stellar.org/docs/platforms/stellar-disbursement-platform)
+**revoked (sanctioned) recipients** — while **never revealing which eligibility-set
+member is claiming** (the recipient address and amount are public, as in any
+payment). It's the [Stellar Disbursement Platform](https://developers.stellar.org/docs/platforms/stellar-disbursement-platform)
 pattern with a zero-knowledge privacy + compliance layer.
 
 **One ZK proof, verified on-chain, does all four:**
@@ -29,7 +31,7 @@ pattern with a zero-knowledge privacy + compliance layer.
 | 🔒 No double-claims | per-campaign **nullifier** | `#9 AlreadyClaimed` |
 | 🛡️ No stolen / redirected payouts | proof **bound to recipient** | `#7 RecipientMismatch` |
 | ⚖️ Issuer can **revoke / sanction** | **denylist non-membership** + admin deny-root | `#10 DenyRootMismatch` |
-| 📊 **Auditor-ready** | on-chain totals + `claim`/`deny_set` events; `scripts/audit.sh` reconciles a campaign | no identity revealed |
+| 📊 **Auditor-ready** | on-chain totals + `claim`/`deny_set` events; `scripts/audit.sh` reconciles a campaign | eligibility identity stays unlinked |
 
 **Why ZK is load-bearing:** without the proof, the contract could not know the
 claimant is eligible, *not revoked*, and unique — **without seeing who they are**.
@@ -78,7 +80,7 @@ A claim proves *membership in allow ∧ non-membership in deny*, in zero knowled
 > Why this matters: public token distributions get farmed by bots (≈40% of the Linea
 > airdrop's claimants were Sybils), naive allow-lists doxx every recipient, and
 > regulated issuers need to **revoke / exclude** bad actors. ProofDrop gives
-> one-claim-per-identity enforcement **with recipient privacy and compliance
+> one-claim-per-identity enforcement **with eligibility privacy and compliance
 > controls** — moving real money to real people, privately.
 
 ---

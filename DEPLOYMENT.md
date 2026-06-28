@@ -39,17 +39,18 @@ only after on-chain BN254 proof verification. The claim emits a `claim` event
  ProofDrop — Auditor Report (Stellar testnet)
  Campaign        : 42
  Asset (SEP-41)  : CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC
- Allowlist root  : 028d09bc…
- Active deny root: 0cf6bf88…
+ Allowlist root  : 2624b7c8…
+ Active deny root: 178f1003…
  Successful claims : 1
  Total disbursed   : 1000000
  Conclusion: every payout is one-claim-per-nullifier, bound to this campaign
- and asset, and reconciles to the contract total — with no recipient identity
- revealed on-chain.
+ and asset, and reconciles to the contract total — without revealing which
+ eligibility-set member claimed (recipient address + amount are public).
 ```
 
 An auditor verifies totals, claim count, asset/campaign consistency, and the
-active policy roots — **without learning who any recipient is.** (Recipient-level
+active policy roots — **without learning which eligibility-set member each claim
+maps to.** (Recipient address + amount are public, as in any payment; recipient-level
 selective disclosure via a viewing key is a documented future step.)
 
 ## Reproduce it

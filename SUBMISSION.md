@@ -6,8 +6,8 @@
 
 ## Tagline
 **Compliance-ready private disbursement rails for Stellar** — pay approved recipients
-in stablecoins without exposing them on-chain, with one-claim anti-abuse, issuer
-revocation, and auditor-ready reporting.
+in stablecoins without doxxing the eligibility set on-chain, with one-claim anti-abuse,
+issuer revocation, and auditor-ready reporting.
 
 ## Links
 - **Repo:** https://github.com/R4Y4N3/proofdrop
@@ -49,7 +49,8 @@ The proof is generated **off-chain** (Circom / Groth16 / BN254) and **verified
 on-chain** inside a Soroban smart contract using Stellar's native BN254 host
 functions; the contract then pays a **SEP-41** token. An **auditor report** (and a
 read-only web dashboard) reconciles totals, claim count, and policy roots from
-on-chain state — **without de-anonymizing anyone**.
+on-chain state — **without revealing which eligibility-set member each claim maps
+to** (recipient address and amount are public, as in any payment).
 
 ## Stellar / Soroban integration (essential, not bolted-on)
 - **On-chain ZK verification** with Soroban's **BN254** host functions
@@ -65,8 +66,9 @@ on-chain state — **without de-anonymizing anyone**.
   (see tx links).
 
 Why Stellar specifically: Stellar is built for **real-world money movement**, and
-Protocol 25 added exactly the ZK primitives (BN254 + Poseidon) needed to verify these
-proofs cheaply on-chain. ProofDrop couldn't exist on Stellar a protocol ago.
+Protocol 25 added the on-chain **BN254** host functions used to verify these proofs
+cheaply (Poseidon runs inside the Circom circuit). ProofDrop couldn't exist on
+Stellar a protocol ago.
 
 ## Why ZK is load-bearing
 Remove the proof and the product disappears: the contract could not know the claimant
